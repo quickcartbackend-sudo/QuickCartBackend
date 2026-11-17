@@ -1,5 +1,5 @@
 package com.quickcart.chat.exception;
-
+import org.springframework.http.HttpHeaders;
 import com.quickcart.chat.dto.ErrorDetail;
 import com.quickcart.chat.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +45,14 @@ public class GlobalExceptionHandler {
                         e.getDefaultMessage()))
                 .toList();
         return validation("Validation failed.", req, details);
+    }
+
+    @ExceptionHandler(RateLimitedException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimited(RateLimitedException ex, HttpServletRequest req) {
+        ResponseEntity<ErrorResponse> base = build(ex.getStatus(), ex.getCode(), ex.getMessage(), req, ex.getDetails());
+        return ResponseEntity.status(base.getStatusCode())
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(base.getBody());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)

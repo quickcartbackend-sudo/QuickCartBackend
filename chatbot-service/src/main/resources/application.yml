@@ -34,3 +34,12 @@ quickcart:
     issuer: quickcart-user-service
   gateway:
     base-url: ${GATEWAY_BASE_URL:http://localhost:8080}   # used by the tools in B3
+  chat:
+    max-message-length: 500
+    memory-window: 10
+    conversation-ttl: 30m
+    max-conversations-per-user: 3
+    rate-limit-per-minute: 10
+    llm-concurrency: 2
+    llm-queue-wait: 20s
+    llm-timeout: 90s              # applied to the Ollama HTTP client in B4

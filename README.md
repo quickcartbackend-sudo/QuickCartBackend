@@ -1,1 +1,1 @@
-"# QuickCartBackend-" 
+"# QuickCartBackend" 
