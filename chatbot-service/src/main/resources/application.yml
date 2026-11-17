@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: chat-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:qwen2.5:7b}
+          temperature: 0.2
+
+server:
+  port: ${SERVER_PORT:8084}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  pattern:
+    level: "%5p [%X{requestId:-}]"
+
+quickcart:
+  jwt:
+    secret: ${JWT_SECRET}            # secret: no default, min 32 chars (fail fast)
+    issuer: quickcart-user-service
+  gateway:
+    base-url: ${GATEWAY_BASE_URL:http://localhost:8080}   # used by the tools in B3
