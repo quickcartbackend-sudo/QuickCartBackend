@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties(prefix = "quickcart.chat")
 public record ChatProperties(
-        @DefaultValue("500") int maxMessageLength,
+        // @DefaultValue("500") int maxMessageLength,
         @DefaultValue("10") int memoryWindow,
         @DefaultValue("30m") Duration conversationTtl,
         @DefaultValue("3") int maxConversationsPerUser,

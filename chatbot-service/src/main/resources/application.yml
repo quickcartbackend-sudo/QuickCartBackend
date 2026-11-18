@@ -14,6 +14,10 @@ spring:
         options:
           model: ${OLLAMA_MODEL:qwen2.5:7b}
           temperature: 0.2
+  http:
+    client:
+      connect-timeout: 5s
+      read-timeout: ${quickcart.chat.llm-timeout:90s}   # also applies to the Ollama client
 
 server:
   port: ${SERVER_PORT:8084}
@@ -33,9 +37,11 @@ quickcart:
     secret: ${JWT_SECRET}            # secret: no default, min 32 chars (fail fast)
     issuer: quickcart-user-service
   gateway:
-    base-url: ${GATEWAY_BASE_URL:http://localhost:8080}   # used by the tools in B3
+    base-url: ${GATEWAY_BASE_URL:http://localhost:8080}
+    connect-timeout-ms: 2000
+    read-timeout-ms: 5000
   chat:
-    max-message-length: 500
+    # max-message-length: 500
     memory-window: 10
     conversation-ttl: 30m
     max-conversations-per-user: 3
