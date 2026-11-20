@@ -11,7 +11,7 @@ public class GatewayClientConfig {
 
     /** Talks to the existing api-gateway only. Timeouts are the contract's 2 s connect / 5 s read. */
     @Bean
-    RestClient gatewayRestClient(RestClient.Builder builder,
+    public RestClient gatewayRestClient(RestClient.Builder builder,
                                  @Value("${quickcart.gateway.base-url}") String baseUrl,
                                  @Value("${quickcart.gateway.connect-timeout-ms:2000}") int connectTimeoutMs,
                                  @Value("${quickcart.gateway.read-timeout-ms:5000}") int readTimeoutMs) {

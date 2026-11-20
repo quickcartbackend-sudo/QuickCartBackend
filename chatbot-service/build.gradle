@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.8'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.google.cloud.tools.jib' version '3.4.4'      // same version as the existing modules
 }
 
 group = 'com.quickcart'
@@ -38,8 +39,19 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-bootJar {
-    archiveFileName = 'app.jar'      // fixed name for the Dockerfile (B6)
+jib {
+    from {
+        image = 'eclipse-temurin:21-jre'
+    }
+    to {
+        image = 'quickcart/chat-service'
+        tags = ['latest']
+    }
+    container {
+        user = '1000'                       // non-root
+        ports = ['8084']
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }
 
 tasks.withType(Test).configureEach { useJUnitPlatform() }

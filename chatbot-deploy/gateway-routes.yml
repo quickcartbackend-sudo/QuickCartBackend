@@ -1,0 +1,21 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/auth/**,/api/v1/users/**
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/v1/categories/**,/api/v1/products/**,/api/v1/admin/categories/**,/api/v1/admin/products/**,/api/v1/admin/inventory/**
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/v1/cart/**,/api/v1/orders/**,/api/v1/admin/orders/**
+        # Chatbot: static URL, NOT Eureka (the chatbot is independent of the frozen Boot/Cloud versions)
+        - id: chat-service
+          uri: http://chat-service:8084
+          predicates:
+            - Path=/api/v1/chat/**

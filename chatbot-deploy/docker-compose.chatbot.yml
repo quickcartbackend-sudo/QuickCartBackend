@@ -1,0 +1,43 @@
+# Overlay. Run from the folder that holds docker-compose.yml:
+#   docker compose -f docker-compose.yml -f chatbot-deploy/docker-compose.chatbot.yml up -d
+# Relative paths below resolve from that folder (the first -f file).
+# The chat-service image is built by Jib first: cd chatbot-service && ./gradlew jibDockerBuild
+services:
+  chat-service:
+    image: quickcart/chat-service:latest          # built by Jib, not by Compose
+    pull_policy: never                            # never look for it on Docker Hub
+    expose:
+      - "8084"                                    # internal only, not published to the host
+    environment:
+      SERVER_PORT: 8084
+      JWT_SECRET: ${JWT_SECRET:?set in .env}
+      GATEWAY_BASE_URL: http://api-gateway:8080
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      JAVA_TOOL_OPTIONS: ${JAVA_OPTS:--Xms64m -Xmx192m}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"       # reaches Ollama on the host (needed on Linux)
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/localhost/8084 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '\"status\":\"UP\"' <&3"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 60s
+
+  api-gateway:                                    # override only: add the chat route
+    environment:
+      SPRING_CONFIG_IMPORT: file:/config/chat-routes.yml
+    volumes:
+      - ./chatbot-deploy/gateway-routes.yml:/config/chat-routes.yml:ro
+
+  chat-edge:                                      # Dockerfile and nginx.conf are owned by the frontend bot
+    build:
+      context: .
+      dockerfile: chatbot-deploy/edge/Dockerfile
+    ports:
+      - "3001:80"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
